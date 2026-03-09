@@ -1,0 +1,6 @@
+# Repository Index for game directory
+# This file describes the purpose of this directory for AI agents
+
+tag: game-logic
+purpose: Game-specific code - entities, components, and gameplay logic
+

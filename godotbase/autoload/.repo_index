@@ -1,0 +1,9 @@
+# Repository Index for autoload directory
+# This file describes the purpose of this directory for AI agents
+
+tag: autoload-singletons
+purpose: Godot Autoload scripts - global scriptes that persist across scenes and load first/unload last.
+Contains:
+1. Environment runtime, an entry for the core environemnt-system structure. Should always run first.
+2. Node-based controllers that bridge between the scene tree and Systems, providing scene tree capabilities to RefCounted Systems. Controllers do NOT manage System lifecycle - see docs/developer.md
+

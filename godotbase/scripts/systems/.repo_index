@@ -1,0 +1,6 @@
+# Repository Index for systems directory
+# This file describes the purpose of this directory for AI agents
+
+tag: system-implementations
+purpose: Concrete System implementations - game-specific systems that extend the core System base class
+

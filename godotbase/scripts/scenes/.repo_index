@@ -1,0 +1,6 @@
+# Repository Index for scripts/scenes directory
+# This file describes the purpose of this directory for AI agents
+
+tag: scene-controllers
+purpose: Scene controller scripts - scripts attached to scene root nodes that manage scene-level logic and UI
+

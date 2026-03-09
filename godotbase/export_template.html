@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<title>$GODOT_PROJECT_NAME</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+		<script>
+			// ========================================
+			// PostMessage Bridge (Godot 通信)
+			// ========================================
+			// 消息队列 - 在 Godot callback 就绪前缓存消息
+			window._godotMessageQueue = [];
+
+			// Console log buffer - 环形缓冲区存储最近 50 条日志
+			window._consoleLogBuffer = [];
+			const MAX_CONSOLE_LOGS = 50;
+
+			function captureConsoleLog(level, args) {
+				const timestamp = new Date().toISOString();
+				const message = args.map(arg => 
+					arg instanceof Error ? arg.message : String(arg)
+				).join(' ');
+				
+				const entry = `[${timestamp}] [${level}] ${message}`;
+				window._consoleLogBuffer.push(entry);
+				
+				// 保持最多 50 条
+				if (window._consoleLogBuffer.length > MAX_CONSOLE_LOGS) {
+					window._consoleLogBuffer.shift();
+				}
+			}
+
+			// 拦截 console.log, console.warn, console.info, console.debug
+			const originalConsoleLog = console.log;
+			const originalConsoleWarn = console.warn;
+			const originalConsoleInfo = console.info;
+			const originalConsoleDebug = console.debug;
+
+			console.log = function(...args) {
+				captureConsoleLog('LOG', args);
+				originalConsoleLog.apply(console, args);
+			};
+
+			console.warn = function(...args) {
+				captureConsoleLog('WARN', args);
+				originalConsoleWarn.apply(console, args);
+			};
+
+			console.info = function(...args) {
+				captureConsoleLog('INFO', args);
+				originalConsoleInfo.apply(console, args);
+			};
+
+			console.debug = function(...args) {
+				captureConsoleLog('DEBUG', args);
+				originalConsoleDebug.apply(console, args);
+			};
+
+		window.addEventListener('message', function(event) {
+			if (event.data && event.data.type === 'toGodot') {
+				if (typeof window._godotReceiveMessage === 'function') {
+					try {
+						window._godotReceiveMessage(JSON.stringify(event.data));
+					} catch (e) {
+						console.warn('[Bridge] Callback failed, queuing:', e);
+						window._godotMessageQueue.push(event.data);
+					}
+				} else {
+					window._godotMessageQueue.push(event.data);
+				}
+			}
+		});
+
+			// Error capture and reporting
+			window.addEventListener("error", (event) => {
+				if (event.target instanceof Element) return;
+
+				const errorInfo = {
+					type: "scriptError",
+					timestamp: Date.now().toString(),
+					message: event.error?.message || event.message,
+					stack: event.error?.stack || "No stack trace",
+					source: window.location.href,
+				};
+
+				sendErrorViaPostMessage(errorInfo);
+			});
+
+			window.addEventListener("unhandledrejection", (event) => {
+				const errorInfo = {
+					type: "unhandledRejection",
+					timestamp: Date.now().toString(),
+					message: event.reason?.message || String(event.reason),
+					stack: event.reason?.stack || "No stack trace",
+					source: window.location.href,
+				};
+
+				sendErrorViaPostMessage(errorInfo);
+			});
+
+			const originalConsoleError = console.error;
+
+			console.error = function (...args) {
+				originalConsoleError.apply(console, args);
+
+				const errorInfo = args.map((arg) => {
+					return {
+						type: "consoleError",
+						timestamp: Date.now().toString(),
+						source: window.location.href,
+						message: arg instanceof Error ? arg.message : String(arg),
+						stack: arg instanceof Error ? arg.stack : null,
+					};
+				});
+
+				sendErrorViaPostMessage(errorInfo);
+			};
+
+			function sendErrorViaPostMessage(errorInfo) {
+				// 添加 consoleLogs 字段
+				const consoleLogs = window._consoleLogBuffer.join('\n');
+				const dataWithLogs = Array.isArray(errorInfo) 
+					? errorInfo.map(info => ({ ...info, consoleLogs }))
+					: { ...errorInfo, consoleLogs };
+				
+				window.parent.postMessage(
+					{
+						type: "adventureGameError",
+						data: dataWithLogs,
+					},
+					"*"
+				);
+			}
+		</script>
+		<style>
+html, body, #canvas {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+body {
+	color: white;
+	background-color: black;
+	overflow: hidden;
+	touch-action: none;
+	font-family: 'Noto Sans SC', 'Press Start 2P', sans-serif;
+}
+
+#canvas {
+	display: block;
+}
+
+#canvas:focus {
+	outline: none;
+}
+
+#status {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-color: black;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	visibility: hidden;
+	z-index: 10;
+	padding-bottom: 10vh;
+}
+
+#status-logo {
+	max-width: min(280px, 50vw);
+	max-height: min(280px, 40vh);
+	width: auto;
+	height: auto;
+	object-fit: contain;
+}
+
+#status-loading {
+	position: absolute;
+	bottom: 30%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+}
+
+#status-spinner {
+	width: 32px;
+	height: 32px;
+	border: 3px solid rgba(102, 102, 255, 0.3);
+	border-top-color: #6666ff;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	to { transform: rotate(360deg); }
+}
+
+#status-text {
+	font-family: 'Noto Sans SC', sans-serif;
+	font-size: 14px;
+	color: rgba(255, 255, 255, 0.6);
+	letter-spacing: 1px;
+}
+
+#status-notice {
+	display: none;
+	background-color: #5b3943;
+	border-radius: 0.5rem;
+	border: 1px solid #9b3943;
+	color: #e0e0e0;
+	font-family: 'Noto Sans SC', 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+	line-height: 1.3;
+	margin: 2rem;
+	overflow: hidden;
+	padding: 1rem;
+	text-align: center;
+	z-index: 1;
+}
+
+#status-powered-by {
+	position: absolute;
+	bottom: min(5%, 40px);
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+}
+
+#status-powered-by span {
+	font-family: 'Noto Sans SC', sans-serif;
+	font-size: clamp(10px, 1.5vw, 14px);
+	color: rgba(255, 255, 255, 0.4);
+	letter-spacing: 0.5px;
+}
+
+#status-godot-logo {
+	height: clamp(24px, 5vw, 40px);
+	width: auto;
+	opacity: 0.5;
+}
+		</style>
+$GODOT_HEAD_INCLUDE
+	</head>
+	<body>
+		<canvas id="canvas">
+			Your browser does not support the canvas tag.
+		</canvas>
+
+		<noscript>
+			Your browser does not support JavaScript.
+		</noscript>
+
+		<div id="status">
+			<img id="status-logo" alt="Loading...">
+			<div id="status-loading">
+				<div id="status-spinner"></div>
+				<div id="status-text">Preparing</div>
+			</div>
+			<div id="status-notice"></div>
+			<div id="status-powered-by">
+				<span>Powered by</span>
+				<img id="status-godot-logo" src="godot_logo.png" alt="Godot Engine">
+			</div>
+		</div>
+
+		<script src="$GODOT_URL"></script>
+		<script>
+// Set logo src dynamically (Godot exports {name}.icon.png)
+(function() {
+	const pageName = window.location.pathname.split('/').pop()?.replace('.html', '') || 'index';
+	const logo = document.getElementById('status-logo');
+	logo.src = pageName + '.icon.png';
+	logo.onerror = function() {
+		// Hide logo if failed to load
+		this.style.display = 'none';
+	};
+})();
+
+const GODOT_CONFIG = $GODOT_CONFIG;
+const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
+const engine = new Engine(GODOT_CONFIG);
+
+// ========================================
+// Loading PCK Management (for HTML pre-caching)
+// ========================================
+// Godot reads this directly via JavaScriptBridge.eval("window.loadingPckFile")
+window.loadingPckFile = null;  // e.g., "loading_abc123.pck"
+
+// Supply Godot with function to hide HTML loading overlay
+window.hideLoadingOverlay = function() {
+	const status = document.getElementById('status');
+	if (status) {
+		status.style.transition = 'opacity 0.3s ease-out';
+		status.style.opacity = '0';
+		setTimeout(() => status.remove(), 300);
+	}
+};
+
+window.parent.postMessage(
+	{
+		type: "adventureGameInit",
+		data: {
+			features: ["muted", "screenshot"],
+		}
+	},
+	"*"
+);
+
+(function () {
+	const statusOverlay = document.getElementById('status');
+	const statusNotice = document.getElementById('status-notice');
+
+	let initializing = true;
+	let statusMode = '';
+
+	function setStatusMode(mode) {
+		if (statusMode === mode || !initializing) {
+			return;
+		}
+		if (mode === 'hidden') {
+			// Don't remove overlay here - let Godot call hideLoadingOverlay when ready
+			initializing = false;
+			return;
+		}
+		// Modes: 'loading' (default - show overlay with spinner), 'notice' (show error message)
+		statusOverlay.style.visibility = 'visible';
+		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+		statusMode = mode;
+	}
+
+	function setStatusNotice(text) {
+		while (statusNotice.lastChild) {
+			statusNotice.removeChild(statusNotice.lastChild);
+		}
+		const lines = text.split('\n');
+		lines.forEach((line) => {
+			statusNotice.appendChild(document.createTextNode(line));
+			statusNotice.appendChild(document.createElement('br'));
+		});
+	}
+
+	function displayFailureNotice(err) {
+		console.error(err);
+		
+		if (err instanceof Error) {
+			setStatusNotice(err.message);
+		} else if (typeof err === 'string') {
+			setStatusNotice(err);
+		} else {
+			setStatusNotice('An unknown error occurred.');
+		}
+		setStatusMode('notice');
+		initializing = false;
+	}
+
+	const missing = Engine.getMissingFeatures({
+		threads: GODOT_THREADS_ENABLED,
+	});
+
+	if (missing.length !== 0) {
+		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+			let serviceWorkerRegistrationPromise;
+			try {
+				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+			} catch (err) {
+				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
+			}
+			Promise.race([
+				serviceWorkerRegistrationPromise.then((registration) => {
+					if (registration != null) {
+						return Promise.reject(new Error('Service worker already exists.'));
+					}
+					return registration;
+				}).then(() => engine.installServiceWorker()),
+				new Promise((resolve) => {
+					setTimeout(() => resolve(), 2000);
+				}),
+			]).then(() => {
+				window.location.reload();
+			}).catch((err) => {
+				console.error('Error while registering service worker:', err);
+			});
+		} else {
+			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
+			displayFailureNotice(missingMsg + missing.join('\n'));
+		}
+	} else {
+		// Show loading status
+		setStatusMode('loading');
+		
+		// Load loading_pck.json to get PCK filename BEFORE starting engine
+		// This ensures window.loadingPckFile is set when Godot reads it
+		console.log('[HTML] Fetching loading_pck.json...');
+		fetch('loading_pck.json?t=' + Date.now())
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Failed to fetch loading_pck.json: ' + response.status);
+				}
+				return response.json();
+			})
+			.then((info) => {
+				// Store loading.pck filename for Godot to read
+				// Godot's ResourceSystem will download the PCK via HTTPRequest
+				const loadingFile = info.file;
+				window.loadingPckFile = loadingFile || '';
+				console.log('[HTML] loading_pck.json loaded:', loadingFile);
+			})
+			.catch((err) => {
+				console.error('[HTML] loading_pck.json loading failed:', err);
+				// Set empty string so Godot knows there's no loading.pck
+				window.loadingPckFile = '';
+			})
+			.finally(() => {
+				// Start engine AFTER loading_pck.json is processed
+				console.log('[HTML] Starting Godot engine...');
+				engine.startGame({
+					// No onProgress callback - we don't show progress bar
+				}).then(() => {
+					setStatusMode('hidden');
+				}, displayFailureNotice);
+			});
+	}
+}());
+		</script>
+	</body>
+</html>

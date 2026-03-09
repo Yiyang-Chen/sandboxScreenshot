@@ -1,0 +1,5 @@
+{
+  "extensions": ["png", "webp", "ttf"],
+  "internal_prefix": "res://loading/",
+  "pack_imported": false
+}

@@ -1,0 +1,5 @@
+# Repository Index for docs directory
+# This file describes the purpose of this directory for AI agents
+
+tag: documentation
+purpose: project documentation and design files for AI agents to understand the codebase

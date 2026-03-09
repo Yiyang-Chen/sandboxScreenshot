@@ -1,0 +1,5 @@
+{
+  "default": "ding_talk_jin_bu_ti_regular",
+  "extensions": ["ttf", "otf", "woff", "woff2"],
+  "internal_prefix": "res://fonts/"
+}

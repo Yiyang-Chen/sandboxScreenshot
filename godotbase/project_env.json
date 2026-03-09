@@ -1,0 +1,47 @@
+{
+    "config_path": "public/assets/game_config.json",
+    "public_root": "public",
+    "prompt_injection": {
+        "game agent": [
+            {
+                "decorator": "file_block",
+                "path": "docs/designer.md",
+                "label": "designer-guide",
+                "target": "system_prompt",
+                "watch": false
+            }
+        ],
+        "game developer agent": [
+            {
+                "decorator": "file_block",
+                "path": "docs/gdscript-style.md",
+                "label": "gdscript-style",
+                "target": "system_prompt",
+                "watch": true
+            },
+            {
+                "decorator": "file_block",
+                "path": "docs/developer.md",
+                "label": "developer-guide",
+                "target": "system_prompt",
+                "watch": true
+            },
+            {
+                "decorator": "file_block",
+                "path": "docs/indexing-guide.md",
+                "label": "indexing-guide",
+                "target": "system_prompt",
+                "watch": true
+            },
+            {
+                "decorator": "file_block",
+                "path": "docs/configuration.md",
+                "label": "configuration-guide",
+                "target": "user_message",
+                "watch": true
+            }
+        ]
+    },
+    "mod_config_presets": []
+}
+

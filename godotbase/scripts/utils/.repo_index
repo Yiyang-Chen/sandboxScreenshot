@@ -1,0 +1,5 @@
+# Repository Index for utils directory
+# This file describes the purpose of this directory for AI agents
+
+tag: utilities
+purpose: Utility classes and helper functions - ID generators, UUID generators, and common tools

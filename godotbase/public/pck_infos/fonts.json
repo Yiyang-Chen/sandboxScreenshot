@@ -1,0 +1,11 @@
+{
+  "default_font": "ding_talk_jin_bu_ti_regular",
+  "fonts": [
+    {
+      "key": "ding_talk_jin_bu_ti_regular",
+      "path": "res://fonts/DingTalkJinBuTi-Regular.ttf"
+    }
+  ],
+  "hash": "4ec742",
+  "pck_file": "fonts_4ec742.pck"
+}

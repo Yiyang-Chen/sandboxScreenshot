@@ -1,0 +1,6 @@
+# Repository Index for core directory
+# This file describes the purpose of this directory for AI agents
+
+tag: core-architecture
+purpose: Core system architecture - base classes for System pattern and GameEnvironment multi-instance management
+

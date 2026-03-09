@@ -1,0 +1,5 @@
+# Tools directory for development and indexing
+tag: tools
+purpose: build scripts and development tools (not game code)
+
+`build.sh`: agent should use ../build.sh to build in sandbox environment, instead of using ./build.sh in this folder.

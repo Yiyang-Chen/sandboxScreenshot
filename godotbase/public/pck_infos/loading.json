@@ -1,0 +1,30 @@
+{
+  "files": [
+    {
+      "key": "combo_logo",
+      "path": "res://loading/combo_logo.png"
+    },
+    {
+      "key": "loading_text_spritesheet",
+      "path": "res://loading/loading_text_spritesheet.webp"
+    },
+    {
+      "key": "move_animated_spritesheet",
+      "path": "res://loading/move_animated_spritesheet.webp"
+    },
+    {
+      "key": "press_start_2p_regular",
+      "path": "res://loading/PressStart2P-Regular.ttf"
+    },
+    {
+      "key": "progressbar_inside",
+      "path": "res://loading/progressbar_inside.png"
+    },
+    {
+      "key": "progressbar_outside",
+      "path": "res://loading/progressbar_outside.png"
+    }
+  ],
+  "hash": "34bd46",
+  "pck_file": "loading_34bd46.pck"
+}

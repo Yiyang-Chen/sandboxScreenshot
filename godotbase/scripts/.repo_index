@@ -1,0 +1,6 @@
+# Repository Index for scripts directory
+# This file describes the purpose of this directory for AI agents
+
+tag: scripts
+purpose: All GDScript code organized by functionality - core architecture, systems, game logic, and utilities
+

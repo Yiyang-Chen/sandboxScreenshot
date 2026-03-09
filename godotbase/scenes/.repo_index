@@ -1,0 +1,6 @@
+# Repository Index for scenes directory
+# This file describes the purpose of this directory for AI agents
+
+tag: scenes
+purpose: All scene files (.tscn) - game levels, UI screens, and reusable scene prefabs
+

@@ -1,0 +1,32 @@
+# Godot caches
+.godot/
+.import/
+
+# Agent indexing
+.agent_index/
+
+# Build/Export outputs
+dist/
+*.pck
+*.exe
+*.dmg
+*.app
+
+# Generated runtime config
+public/pck_infos/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+temp/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
