@@ -1,7 +1,7 @@
 extends TestRunner
 
 ## Example test script demonstrating the TestRunner API.
-## Run with: ./run_test.sh tests/example_test.gd
+## Run with: ./godotbase/tests/framework/run_test.sh framework/example_test.gd
 
 func _run_test() -> void:
 	var scene: Node = load_test_scene("res://scenes/main.tscn")

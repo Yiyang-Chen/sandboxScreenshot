@@ -5,7 +5,7 @@ Automated testing framework for capturing screenshots of Godot scenes in a headl
 ## Quick Start
 
 1. Create a test script in `godotbase/tests/` that extends `TestRunner`
-2. Run it with `./run_test.sh tests/your_test.gd`
+2. Run it with `./godotbase/tests/framework/run_test.sh your_test.gd`
 3. Screenshots appear in `screenshot/{YYYYMMDD_HHMMSS}/`
 
 ## Writing a Test Script
@@ -66,7 +66,7 @@ finish(1)      # failure
 ## Running Tests
 
 ```bash
-./run_test.sh tests/your_test.gd
+./godotbase/tests/framework/run_test.sh your_test.gd
 ```
 
 Optional arguments (passed after the script path):
@@ -79,12 +79,12 @@ Optional arguments (passed after the script path):
 Example with custom resolution:
 
 ```bash
-./run_test.sh tests/your_test.gd --width 1920 --height 1080
+./godotbase/tests/framework/run_test.sh your_test.gd --width 1920 --height 1080
 ```
 
 ## Output
 
-Screenshots are saved to a timestamped folder under `screenshot/` at the project root:
+Screenshots are saved to a timestamped folder under `screenshot/` at the workspace root:
 
 ```
 screenshot/
@@ -94,6 +94,20 @@ screenshot/
 ```
 
 The shell script prints the screenshot folder path on completion.
+
+## File Structure
+
+```
+godotbase/tests/
+├── test-runner.md              # This doc
+├── framework/                  # Core framework (do not modify)
+│   ├── test_runner.gd          # TestRunner base class
+│   ├── run_test.sh             # Shell entry point
+│   └── example_test.gd         # Example test
+│
+├── test_my_scene.gd            # Your test scripts go here
+└── ...
+```
 
 ## Important Notes
 
@@ -106,4 +120,4 @@ The shell script prints the screenshot folder path on completion.
 
 ## Example
 
-See `godotbase/tests/example_test.gd` for a minimal working example.
+See `godotbase/tests/framework/example_test.gd` for a minimal working example.

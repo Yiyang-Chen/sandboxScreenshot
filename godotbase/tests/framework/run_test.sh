@@ -1,25 +1,26 @@
 #!/bin/bash
 # Headless test runner using Xvfb + Godot
 # Runs agent-authored test scripts that extend TestRunner.
-# Screenshots are saved to screenshot/{timestamp}/.
+# Screenshots are saved to screenshot/{timestamp}/ at the workspace root.
 #
-# Usage:
-#   ./run_test.sh tests/test_my_scene.gd
-#   ./run_test.sh tests/test_my_scene.gd --width 1920 --height 1080
+# Usage (from workspace root):
+#   ./godotbase/tests/framework/run_test.sh test_my_scene.gd
+#   ./godotbase/tests/framework/run_test.sh test_my_scene.gd --width 1920 --height 1080
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FRAMEWORK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$FRAMEWORK_DIR/../.." && pwd)"
+WORKSPACE_ROOT="$(cd "$PROJECT_DIR/.." && pwd)"
 GODOT="/root/tools/godot/godot"
-PROJECT_DIR="$SCRIPT_DIR/godotbase"
 
 if [ -z "$1" ]; then
     echo "Usage: $0 <test_script.gd> [--width W] [--height H]"
-    echo "  test_script.gd  Path relative to godotbase/ (e.g. tests/test_my_scene.gd)"
+    echo "  test_script.gd  Filename in godotbase/tests/ (e.g. test_my_scene.gd)"
     exit 1
 fi
 
-TEST_SCRIPT="$1"
+TEST_SCRIPT="tests/$1"
 shift
 
 export LD_LIBRARY_PATH="/root/localroot/usr/lib/x86_64-linux-gnu:/root/localroot/usr/lib/x86_64-linux-gnu/dri${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
@@ -35,7 +36,7 @@ export __EGL_VENDOR_LIBRARY_DIRS="/usr/share/glvnd/egl_vendor.d"
 export EGL_PLATFORM=surfaceless
 
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-SCREENSHOT_DIR="$SCRIPT_DIR/screenshot/$TIMESTAMP"
+SCREENSHOT_DIR="$WORKSPACE_ROOT/screenshot/$TIMESTAMP"
 mkdir -p "$SCREENSHOT_DIR"
 
 DISPLAY_NUM=99
