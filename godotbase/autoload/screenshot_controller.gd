@@ -112,7 +112,7 @@ func _capture_and_send(source: String) -> void:
 # ========================================
 
 func _log_info(message: String) -> void:
-	var msg := "[ScreenshotController] %s" % message
+	var msg: String = "[ScreenshotController] %s" % message
 	if _log != null:
 		_log.info(msg)
 	else:
@@ -120,7 +120,7 @@ func _log_info(message: String) -> void:
 
 
 func _log_warn(message: String) -> void:
-	var msg := "[ScreenshotController] %s" % message
+	var msg: String = "[ScreenshotController] %s" % message
 	if _log != null:
 		_log.warn(msg)
 	else:
