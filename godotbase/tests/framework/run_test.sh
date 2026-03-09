@@ -12,7 +12,8 @@ set -e
 FRAMEWORK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$FRAMEWORK_DIR/../.." && pwd)"
 WORKSPACE_ROOT="$(cd "$PROJECT_DIR/.." && pwd)"
-GODOT="/root/tools/godot/godot"
+
+. "$WORKSPACE_ROOT/godot_env.sh"
 
 if [ -z "$1" ]; then
     echo "Usage: $0 <test_script.gd> [--width W] [--height H]"
@@ -23,18 +24,6 @@ fi
 TEST_SCRIPT="tests/$1"
 shift
 
-export LD_LIBRARY_PATH="/root/localroot/usr/lib/x86_64-linux-gnu:/root/localroot/usr/lib/x86_64-linux-gnu/dri${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-export LIBGL_DRIVERS_PATH="/root/localroot/usr/lib/x86_64-linux-gnu/dri"
-export LIBGL_ALWAYS_SOFTWARE=1
-export GALLIUM_DRIVER=llvmpipe
-export GODOT_SILENCE_ROOT_WARNING=1
-export XKB_CONFIG_ROOT="/root/localroot/usr/share/X11/xkb"
-export MESA_GL_VERSION_OVERRIDE=3.3
-export MESA_GLSL_VERSION_OVERRIDE=330
-export VK_ICD_FILENAMES="/usr/share/vulkan/icd.d/lvp_icd.x86_64.json"
-export __EGL_VENDOR_LIBRARY_DIRS="/usr/share/glvnd/egl_vendor.d"
-export EGL_PLATFORM=surfaceless
-
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 SCREENSHOT_DIR="$WORKSPACE_ROOT/screenshot/$TIMESTAMP"
 mkdir -p "$SCREENSHOT_DIR"
@@ -44,7 +33,7 @@ DISPLAY_NUM=99
 pkill -f "Xvfb :$DISPLAY_NUM" 2>/dev/null || true
 sleep 1
 
-/root/localroot/usr/bin/Xvfb :$DISPLAY_NUM -screen 0 1280x720x24 -nolisten tcp -xkbdir /root/localroot/usr/share/X11/xkb 2>/dev/null &
+"$XVFB_BIN" :$DISPLAY_NUM -screen 0 1280x720x24 -nolisten tcp ${XKB_DIR:+-xkbdir "$XKB_DIR"} 2>/dev/null &
 XVFB_PID=$!
 
 cleanup() {
