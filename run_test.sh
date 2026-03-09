@@ -68,6 +68,8 @@ echo " Screenshots: $SCREENSHOT_DIR"
 echo " Xvfb:        :$DISPLAY_NUM (PID: $XVFB_PID)"
 echo "============================================"
 
+"$GODOT" --headless --path "$PROJECT_DIR" --import 2>/dev/null
+
 EXIT_CODE=0
 "$GODOT" --rendering-driver opengl3 --path "$PROJECT_DIR" -s "$TEST_SCRIPT" \
     -- --screenshot-dir "$SCREENSHOT_DIR" "$@" || EXIT_CODE=$?

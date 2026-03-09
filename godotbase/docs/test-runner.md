@@ -97,7 +97,7 @@ The shell script prints the screenshot folder path on completion.
 
 ## Important Notes
 
-- Test scripts run outside the normal game loop. Autoloads (EnvironmentRuntime, EventSystem, etc.) are not loaded. Tests directly load and interact with scene nodes.
+- Test scripts replace the main scene loop, but project autoloads (EnvironmentRuntime, EventSystem, etc.) still load. You can access game systems if needed, but test logic should primarily focus on loading scenes and taking screenshots.
 - Scene paths use Godot's `res://` format (e.g., `res://scenes/main.tscn`).
 - Always call `finish()` at the end of `_run_test()` to properly exit.
 - Use `await` before `wait_frames()` and `take_screenshot()` since they are coroutines.
