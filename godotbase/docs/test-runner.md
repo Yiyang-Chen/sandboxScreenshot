@@ -16,14 +16,14 @@ Create a `.gd` file under `godotbase/tests/` that extends `TestRunner` and overr
 extends TestRunner
 
 func _run_test() -> void:
-    var scene: Node = await load_test_scene("res://scenes/main.tscn")
+    var scene: Node = load_test_scene("res://scenes/main.tscn")
     await wait_frames(10)
-    take_screenshot("initial_state")
+    await take_screenshot("initial_state")
 
     var button: Button = scene.get_node("UI/StartButton") as Button
     button.pressed.emit()
     await wait_frames(5)
-    take_screenshot("after_start")
+    await take_screenshot("after_start")
 
     finish()
 ```
@@ -35,7 +35,7 @@ func _run_test() -> void:
 Loads a PackedScene and adds it to the root viewport. Returns the instantiated node.
 
 ```gdscript
-var scene: Node = await load_test_scene("res://scenes/main.tscn")
+var scene: Node = load_test_scene("res://scenes/main.tscn")
 ```
 
 ### wait_frames(count: int) -> void
@@ -51,7 +51,7 @@ await wait_frames(10)
 Captures the current viewport and saves it as `{screenshot_dir}/{label}.png`. The label becomes the filename.
 
 ```gdscript
-take_screenshot("my_screenshot")
+await take_screenshot("my_screenshot")
 ```
 
 ### finish(exit_code: int = 0) -> void
@@ -100,7 +100,8 @@ The shell script prints the screenshot folder path on completion.
 - Test scripts run outside the normal game loop. Autoloads (EnvironmentRuntime, EventSystem, etc.) are not loaded. Tests directly load and interact with scene nodes.
 - Scene paths use Godot's `res://` format (e.g., `res://scenes/main.tscn`).
 - Always call `finish()` at the end of `_run_test()` to properly exit.
-- Use `await` before `load_test_scene()` and `wait_frames()` since they are async.
+- Use `await` before `wait_frames()` and `take_screenshot()` since they are coroutines.
+- `load_test_scene()` is synchronous — do NOT use `await` with it.
 - The `take_screenshot()` label must be a valid filename (no slashes or special characters).
 
 ## Example

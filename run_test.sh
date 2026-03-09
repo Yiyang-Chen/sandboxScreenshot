@@ -45,6 +45,12 @@ sleep 1
 
 /root/localroot/usr/bin/Xvfb :$DISPLAY_NUM -screen 0 1280x720x24 -nolisten tcp -xkbdir /root/localroot/usr/share/X11/xkb 2>/dev/null &
 XVFB_PID=$!
+
+cleanup() {
+    kill $XVFB_PID 2>/dev/null || true
+}
+trap cleanup EXIT
+
 sleep 2
 
 if ! kill -0 $XVFB_PID 2>/dev/null; then
@@ -62,11 +68,9 @@ echo " Screenshots: $SCREENSHOT_DIR"
 echo " Xvfb:        :$DISPLAY_NUM (PID: $XVFB_PID)"
 echo "============================================"
 
+EXIT_CODE=0
 "$GODOT" --rendering-driver opengl3 --path "$PROJECT_DIR" -s "$TEST_SCRIPT" \
-    -- --screenshot-dir "$SCREENSHOT_DIR" "$@"
-EXIT_CODE=$?
-
-kill $XVFB_PID 2>/dev/null || true
+    -- --screenshot-dir "$SCREENSHOT_DIR" "$@" || EXIT_CODE=$?
 
 echo "============================================"
 if [ $EXIT_CODE -eq 0 ]; then

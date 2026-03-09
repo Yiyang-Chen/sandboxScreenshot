@@ -11,9 +11,9 @@ extends SceneTree
 ##   extends TestRunner
 ##
 ##   func _run_test() -> void:
-##       var scene := await load_test_scene("res://scenes/main.tscn")
+##       var scene: Node = load_test_scene("res://scenes/main.tscn")
 ##       await wait_frames(10)
-##       take_screenshot("initial")
+##       await take_screenshot("initial")
 ##       finish()
 ##
 ##   # Run via shell:
@@ -92,6 +92,7 @@ func wait_frames(count: int) -> void:
 
 ## Capture the current viewport and save it as a PNG.
 ## The file is saved to {screenshot_dir}/{label}.png.
+## This is a coroutine — callers must use: await take_screenshot("label")
 func take_screenshot(label: String) -> void:
 	_screenshot_count += 1
 	var filename: String = "%s.png" % label

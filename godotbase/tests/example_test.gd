@@ -4,8 +4,8 @@ extends TestRunner
 ## Run with: ./run_test.sh tests/example_test.gd
 
 func _run_test() -> void:
-	var scene: Node = await load_test_scene("res://scenes/main.tscn")
+	var scene: Node = load_test_scene("res://scenes/main.tscn")
 	await wait_frames(10)
-	take_screenshot("main_scene")
+	await take_screenshot("main_scene")
 
 	finish()
