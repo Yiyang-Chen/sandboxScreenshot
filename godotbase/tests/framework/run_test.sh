@@ -58,19 +58,23 @@ echo " Screenshots: $SCREENSHOT_DIR"
 echo " Xvfb:        :$DISPLAY_NUM (PID: $XVFB_PID)"
 echo "============================================"
 
+OUTPUT_LOG="$SCREENSHOT_DIR/output.log"
+
 "$GODOT" --headless --path "$PROJECT_DIR" --import 2>/dev/null
 
-EXIT_CODE=0
 "$GODOT" --rendering-driver opengl3 --path "$PROJECT_DIR" -s "$TEST_SCRIPT" \
-    -- --screenshot-dir "$SCREENSHOT_DIR" "$@" || EXIT_CODE=$?
+    -- --screenshot-dir "$SCREENSHOT_DIR" "$@" 2>&1 | tee "$OUTPUT_LOG"
+EXIT_CODE=${PIPESTATUS[0]}
 
 echo "============================================"
 if [ $EXIT_CODE -eq 0 ]; then
     SHOT_COUNT=$(find "$SCREENSHOT_DIR" -name "*.png" 2>/dev/null | wc -l)
     echo " Test PASSED ($SHOT_COUNT screenshots)"
     echo " Screenshots: $SCREENSHOT_DIR"
+    echo " Full log:    $OUTPUT_LOG"
 else
     echo " Test FAILED (exit code: $EXIT_CODE)"
+    echo " Full log:    $OUTPUT_LOG"
 fi
 echo "============================================"
 

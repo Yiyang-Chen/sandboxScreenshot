@@ -4,7 +4,7 @@ extends SceneTree
 ## Base class for agent-authored automated test scripts.
 ##
 ## Subclass this and override _run_test() to write your test logic.
-## Use take_screenshot(), wait_frames(), load_test_scene() inside _run_test().
+## Use take_screenshot(), wait_frames(), load_test_scene(), test_log() inside _run_test().
 ##
 ## Usage:
 ##   # In your test script (e.g. tests/test_my_scene.gd):
@@ -24,6 +24,7 @@ var _viewport_width: int = 1280
 var _viewport_height: int = 720
 var _screenshot_count: int = 0
 var _started: bool = false
+var _log_file: FileAccess = null
 
 
 func _initialize() -> void:
@@ -51,6 +52,11 @@ func _initialize() -> void:
 			push_error("[TestRunner] Failed to create screenshot dir: %s (error %d)" % [_screenshot_dir, err])
 			quit(1)
 			return
+
+	var log_path: String = _screenshot_dir.path_join("test.log")
+	_log_file = FileAccess.open(log_path, FileAccess.WRITE)
+	if _log_file == null:
+		push_warning("[TestRunner] Could not create test.log at %s" % log_path)
 
 	print("[TestRunner] screenshot_dir=%s  size=%dx%d" % [_screenshot_dir, _viewport_width, _viewport_height])
 
@@ -113,7 +119,19 @@ func take_screenshot(label: String) -> void:
 	print("[TestRunner] Screenshot saved: %s (%dx%d)" % [full_path, img.get_width(), img.get_height()])
 
 
+## Write a message to both the terminal and the test.log file.
+func test_log(message: String) -> void:
+	var line: String = "[Test] %s" % message
+	print(line)
+	if _log_file != null:
+		_log_file.store_line(line)
+		_log_file.flush()
+
+
 ## Call this when your test is done.
 func finish(exit_code: int = 0) -> void:
 	print("[TestRunner] Test finished (%d screenshots taken)" % _screenshot_count)
+	if _log_file != null:
+		_log_file.close()
+		_log_file = null
 	quit(exit_code)

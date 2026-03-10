@@ -16,12 +16,14 @@ Create a `.gd` file under `godotbase/tests/` that extends `TestRunner` and overr
 extends TestRunner
 
 func _run_test() -> void:
+    test_log("Loading main scene")
     var scene: Node = load_test_scene("res://scenes/main.tscn")
     await wait_frames(10)
     await take_screenshot("initial_state")
 
     var button: Button = scene.get_node("UI/StartButton") as Button
     button.pressed.emit()
+    test_log("Clicked start button")
     await wait_frames(5)
     await take_screenshot("after_start")
 
@@ -54,6 +56,14 @@ Captures the current viewport and saves it as `{screenshot_dir}/{label}.png`. Th
 await take_screenshot("my_screenshot")
 ```
 
+### test_log(message: String) -> void
+
+Writes a message to both the terminal and `test.log` in the screenshot folder. Use this instead of `print()` to keep a clean, persistent log of test actions.
+
+```gdscript
+test_log("Button clicked, waiting for animation")
+```
+
 ### finish(exit_code: int = 0) -> void
 
 Ends the test. Always call this at the end of `_run_test()`. Pass a non-zero exit code to indicate test failure.
@@ -84,16 +94,19 @@ Example with custom resolution:
 
 ## Output
 
-Screenshots are saved to a timestamped folder under `screenshot/` at the workspace root:
+All output is saved to a timestamped folder under `screenshot/` at the workspace root:
 
 ```
 screenshot/
 └── 20260309_143022/
     ├── initial_state.png
-    └── after_start.png
+    ├── after_start.png
+    ├── test.log              # Agent log messages (from test_log() calls)
+    └── output.log            # Full Godot stdout/stderr
 ```
 
-The shell script prints the screenshot folder path on completion.
+- `test.log` — Only messages written via `test_log()`. Clean and readable.
+- `output.log` — Complete Godot output including engine warnings. Useful for debugging.
 
 ## File Structure
 
