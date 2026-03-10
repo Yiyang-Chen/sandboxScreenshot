@@ -1,7 +1,7 @@
 #!/bin/bash
 # Headless test runner using Xvfb + Godot
 # Runs agent-authored test scripts that extend TestRunner.
-# Screenshots are saved to screenshot/{timestamp}/ at the workspace root.
+# Output is saved to godotbase/tests/test_results/{timestamp}/.
 #
 # Usage (from workspace root):
 #   ./godotbase/tests/framework/run_test.sh test_my_scene.gd
@@ -24,8 +24,9 @@ fi
 TEST_SCRIPT="tests/$1"
 shift
 
+TESTS_DIR="$(cd "$FRAMEWORK_DIR/.." && pwd)"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-SCREENSHOT_DIR="$WORKSPACE_ROOT/screenshot/$TIMESTAMP"
+SCREENSHOT_DIR="$TESTS_DIR/test_results/$TIMESTAMP"
 mkdir -p "$SCREENSHOT_DIR"
 
 DISPLAY_NUM=99

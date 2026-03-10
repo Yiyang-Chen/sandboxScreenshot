@@ -26,8 +26,8 @@ Thumbs.db
 # Temp
 temp/
 
-# Test screenshots
-screenshot/
+# Test results (screenshots + logs)
+test_results/
 
 # Python
 __pycache__/

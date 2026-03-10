@@ -6,7 +6,7 @@ Automated testing framework for capturing screenshots of Godot scenes in a headl
 
 1. Create a test script in `godotbase/tests/` that extends `TestRunner`
 2. Run it with `./godotbase/tests/framework/run_test.sh your_test.gd`
-3. Screenshots appear in `screenshot/{YYYYMMDD_HHMMSS}/`
+3. Results appear in `godotbase/tests/test_results/{YYYYMMDD_HHMMSS}/`
 
 ## Writing a Test Script
 
@@ -94,10 +94,10 @@ Example with custom resolution:
 
 ## Output
 
-All output is saved to a timestamped folder under `screenshot/` at the workspace root:
+All output is saved to a timestamped folder under `godotbase/tests/test_results/`:
 
 ```
-screenshot/
+godotbase/tests/test_results/
 └── 20260309_143022/
     ├── initial_state.png
     ├── after_start.png
@@ -117,6 +117,12 @@ godotbase/tests/
 │   ├── test_runner.gd          # TestRunner base class
 │   ├── run_test.sh             # Shell entry point
 │   └── example_test.gd         # Example test
+│
+├── test_results/               # Output folder (auto-created, gitignored)
+│   └── 20260309_143022/
+│       ├── *.png
+│       ├── test.log
+│       └── output.log
 │
 ├── test_my_scene.gd            # Your test scripts go here
 └── ...
