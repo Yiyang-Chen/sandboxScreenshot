@@ -1,23 +1,61 @@
 #!/bin/bash
 # Headless test runner using Xvfb + Godot
 # Runs agent-authored test scripts that extend TestRunner.
-# Output is saved to godotbase/tests/test_results/{timestamp}/.
+# Output is saved to tests/test_results/{timestamp}/.
 #
-# Usage (from workspace root):
-#   ./godotbase/tests/framework/run_test.sh test_my_scene.gd
-#   ./godotbase/tests/framework/run_test.sh test_my_scene.gd --width 1920 --height 1080
+# Usage (from project root):
+#   bash tests/framework/run_test.sh test_my_scene.gd
+#   bash tests/framework/run_test.sh test_my_scene.gd --width 1920 --height 1080
 
 set -e
 
 FRAMEWORK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$FRAMEWORK_DIR/../.." && pwd)"
-WORKSPACE_ROOT="$(cd "$PROJECT_DIR/.." && pwd)"
 
-. "$WORKSPACE_ROOT/godot_env.sh"
+# --- Environment setup (Godot + Xvfb + Mesa) ---
+
+GODOT="/root/tools/godot/godot"
+
+if command -v Xvfb &>/dev/null; then
+    XVFB_BIN="Xvfb"
+elif [ -x "/root/localroot/usr/bin/Xvfb" ]; then
+    XVFB_BIN="/root/localroot/usr/bin/Xvfb"
+else
+    echo "ERROR: Xvfb not found. Run setup.sh first."
+    exit 1
+fi
+
+if [ -d "/usr/share/X11/xkb" ]; then
+    XKB_DIR="/usr/share/X11/xkb"
+elif [ -d "/root/localroot/usr/share/X11/xkb" ]; then
+    XKB_DIR="/root/localroot/usr/share/X11/xkb"
+else
+    XKB_DIR=""
+fi
+
+if [ -d "/root/localroot/usr/lib/x86_64-linux-gnu" ]; then
+    export LD_LIBRARY_PATH="/root/localroot/usr/lib/x86_64-linux-gnu:/root/localroot/usr/lib/x86_64-linux-gnu/dri${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    export LIBGL_DRIVERS_PATH="/root/localroot/usr/lib/x86_64-linux-gnu/dri"
+fi
+
+export LIBGL_ALWAYS_SOFTWARE=1
+export GALLIUM_DRIVER=llvmpipe
+export MESA_GL_VERSION_OVERRIDE=3.3
+export MESA_GLSL_VERSION_OVERRIDE=330
+export VK_ICD_FILENAMES="/usr/share/vulkan/icd.d/lvp_icd.x86_64.json"
+export __EGL_VENDOR_LIBRARY_DIRS="/usr/share/glvnd/egl_vendor.d"
+export EGL_PLATFORM=surfaceless
+export GODOT_SILENCE_ROOT_WARNING=1
+
+if [ -n "$XKB_DIR" ]; then
+    export XKB_CONFIG_ROOT="$XKB_DIR"
+fi
+
+# --- Test execution ---
 
 if [ -z "$1" ]; then
     echo "Usage: $0 <test_script.gd> [--width W] [--height H]"
-    echo "  test_script.gd  Filename in godotbase/tests/ (e.g. test_my_scene.gd)"
+    echo "  test_script.gd  Filename in tests/ (e.g. test_my_scene.gd)"
     exit 1
 fi
 
