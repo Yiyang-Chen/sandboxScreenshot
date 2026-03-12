@@ -42,11 +42,23 @@ var scene: Node = load_test_scene("res://scenes/main.tscn")
 
 ### wait_frames(count: int) -> void
 
-Waits for the specified number of rendered frames. Use this to let animations play, physics settle, or UI update before taking a screenshot.
+Waits for the specified number of rendered frames. Use for short UI settle time or animation timing where no game event exists.
 
 ```gdscript
 await wait_frames(10)
 ```
+
+### wait_for_event(event_type: Script, timeout_frames: int = 600) -> GameEvent
+
+Waits until the specified GameEvent is triggered via EventSystem, or returns `null` on timeout. Use this instead of `wait_frames()` for loading, initialization, and any async operation that fires an event. Requires EnvironmentRuntime autoload to be active.
+
+```gdscript
+var event: GameEvent = await wait_for_event(LoadingPckLoadedEvent)
+if event != null:
+    test_log("PCK loaded successfully")
+```
+
+Known events: `LoadingPckLoadedEvent`, `ResourceNodeReadyEvent`, `FontLoadedEvent`. Check the codebase for more, or create your own by extending `GameEvent`.
 
 ### take_screenshot(label: String) -> void
 
@@ -130,10 +142,10 @@ godotbase/tests/
 
 ## Important Notes
 
-- Test scripts replace the main scene loop, but project autoloads (EnvironmentRuntime, EventSystem, etc.) still load. You can access game systems if needed, but test logic should primarily focus on loading scenes and taking screenshots.
+- Test scripts replace the main scene loop, but project autoloads (EnvironmentRuntime, EventSystem, etc.) still load. Use `wait_for_event()` to wait for game events (PCK loading, resource fetching, etc.) instead of guessing frame counts with `wait_frames()`.
 - Scene paths use Godot's `res://` format (e.g., `res://scenes/main.tscn`).
 - Always call `finish()` at the end of `_run_test()` to properly exit.
-- Use `await` before `wait_frames()` and `take_screenshot()` since they are coroutines.
+- Use `await` before `wait_frames()`, `wait_for_event()`, and `take_screenshot()` since they are coroutines.
 - `load_test_scene()` is synchronous — do NOT use `await` with it.
 - The `take_screenshot()` label must be a valid filename (no slashes or special characters).
 

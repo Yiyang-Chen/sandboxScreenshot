@@ -4,7 +4,7 @@ extends SceneTree
 ## Base class for agent-authored automated test scripts.
 ##
 ## Subclass this and override _run_test() to write your test logic.
-## Use take_screenshot(), wait_frames(), load_test_scene(), test_log() inside _run_test().
+## Use take_screenshot(), wait_frames(), wait_for_event(), load_test_scene(), test_log() inside _run_test().
 ##
 ## Usage:
 ##   # In your test script (e.g. tests/test_my_scene.gd):
@@ -94,6 +94,39 @@ func load_test_scene(scene_path: String) -> Node:
 func wait_frames(count: int) -> void:
 	for _i: int in range(count):
 		await process_frame
+
+
+## Wait for a game event (via EventSystem) instead of guessing frame counts.
+## Returns the event instance, or null if timed out.
+## Requires EnvironmentRuntime autoload to be active (always true when a scene is loaded).
+##
+## Example:
+##   var event: GameEvent = await wait_for_event(LoadingPckLoadedEvent)
+##   if event != null:
+##       test_log("PCK loaded, success=%s" % str(event.success))
+func wait_for_event(event_type: Script, timeout_frames: int = 600) -> GameEvent:
+	var env_runtime: Node = root.get_node_or_null("EnvironmentRuntime")
+	if env_runtime == null:
+		push_warning("[TestRunner] EnvironmentRuntime not available — cannot wait for event")
+		return null
+
+	var event_system: EventSystem = env_runtime.get_system("EventSystem") as EventSystem
+	if event_system == null:
+		push_warning("[TestRunner] EventSystem not available — cannot wait for event")
+		return null
+
+	var result: Array = []  # single-element wrapper for capture in lambda
+	var handler: Callable = func(e: GameEvent) -> void: result.append(e)
+	event_system.once(event_type, handler)
+
+	for _i: int in range(timeout_frames):
+		if result.size() > 0:
+			return result[0]
+		await process_frame
+
+	event_system.unregister(event_type, handler)
+	push_warning("[TestRunner] wait_for_event timed out after %d frames" % timeout_frames)
+	return null
 
 
 ## Capture the current viewport and save it as a PNG.
