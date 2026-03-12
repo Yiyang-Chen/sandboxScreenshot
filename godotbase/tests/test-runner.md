@@ -5,7 +5,7 @@ Automated testing framework for capturing screenshots of Godot scenes in a headl
 ## Quick Start
 
 1. Create a test script in `godotbase/tests/` that extends `TestRunner`
-2. Run it with `./godotbase/tests/framework/run_test.sh your_test.gd`
+2. Run it with `bash godotbase/tests/framework/run_test.sh your_test.gd`
 3. Results appear in `godotbase/tests/test_results/{YYYYMMDD_HHMMSS}/`
 
 ## Writing a Test Script
@@ -76,7 +76,7 @@ finish(1)      # failure
 ## Running Tests
 
 ```bash
-./godotbase/tests/framework/run_test.sh your_test.gd
+bash godotbase/tests/framework/run_test.sh your_test.gd
 ```
 
 Optional arguments (passed after the script path):
@@ -89,7 +89,7 @@ Optional arguments (passed after the script path):
 Example with custom resolution:
 
 ```bash
-./godotbase/tests/framework/run_test.sh your_test.gd --width 1920 --height 1080
+bash godotbase/tests/framework/run_test.sh your_test.gd --width 1920 --height 1080
 ```
 
 ## Output

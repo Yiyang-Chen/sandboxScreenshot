@@ -21,7 +21,7 @@ This single script installs all system dependencies (Mesa, Xvfb, X11 libraries),
 Run a screenshot test to verify:
 
 ```bash
-./godotbase/tests/framework/run_test.sh framework/example_test.gd
+bash godotbase/tests/framework/run_test.sh framework/example_test.gd
 ```
 
 See `godotbase/tests/test-runner.md` for the full test runner documentation.
@@ -31,7 +31,7 @@ See `godotbase/tests/test-runner.md` for the full test runner documentation.
 | File | Description |
 |------|-------------|
 | `setup.sh` | One-step environment setup |
-| `godot_env.sh` | Shared environment variables (sourced by run scripts) |
+| `godot_env.sh` | Shared environment variables (sourced by `run_capture.sh`) |
 | `run_capture.sh` | Quick one-shot screenshot capture |
 | `godotbase/tests/framework/run_test.sh` | Test runner for agent-authored test scripts |
 | `godotbase/tests/framework/test_runner.gd` | TestRunner base class |
