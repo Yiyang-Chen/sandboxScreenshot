@@ -158,9 +158,11 @@ func set_node(node: Node) -> void:
 		event_sys.trigger(event)
 		log_info("[ResourceSystem] Node provider set, event emitted")
 	
-	# Web 平台：开始加载 loading.pck
+	# 开始加载 loading.pck
 	if OS.has_feature("web"):
 		_start_loading_pck()
+	else:
+		_start_loading_pck_local()
 
 
 # ===== Initialization =====
@@ -660,10 +662,55 @@ func _parse_config(config: Dictionary) -> void:
 
 
 # ========================================
-# Loading PCK Management (Web only)
+# Loading PCK Management
 # ========================================
 
-## 开始加载 loading.pck（直接从 JS 获取文件名，不需要 callback）
+## 非 Web 平台：从本地 dist/loading_pck.json 读取文件名并加载 PCK。
+## 如果 loading_pck.json 不存在或无文件名，视为无需加载，直接标记完成。
+## NOTE: 其他平台（移动端等）可能需要不同的加载方式，届时在此扩展。
+func _start_loading_pck_local() -> void:
+	_loading_pck_status = LoadingPckStatus.LOADING
+
+	var index_path: String = "res://dist/loading_pck.json"
+	var file: FileAccess = FileAccess.open(index_path, FileAccess.READ)
+	if file == null:
+		log_info("[ResourceSystem] dist/loading_pck.json not found, skipping loading.pck")
+		_loading_pck_status = LoadingPckStatus.LOADED
+		_emit_loading_pck_loaded()
+		return
+
+	var json_text: String = file.get_as_text()
+	file.close()
+
+	var json: JSON = JSON.new()
+	if json.parse(json_text) != OK:
+		log_warn("[ResourceSystem] Failed to parse loading_pck.json")
+		_loading_pck_status = LoadingPckStatus.LOADED
+		_emit_loading_pck_loaded()
+		return
+
+	var data: Dictionary = json.data if json.data is Dictionary else {}
+	var pck_file: String = data.get("file", "")
+
+	if pck_file.is_empty():
+		log_info("[ResourceSystem] No loading.pck file in loading_pck.json, skipping")
+		_loading_pck_status = LoadingPckStatus.LOADED
+		_emit_loading_pck_loaded()
+		return
+
+	_loading_pck_file = pck_file
+	log_info("[ResourceSystem] Loading local PCK: %s" % pck_file)
+
+	var config: ResourceConfig = ResourceConfig.new()
+	config.key = "loading_pck"
+	config.type = ResourceTypes.Type.PCK
+	config.skip_cache_busting = true
+	config.local_path = "res://dist/" + pck_file
+
+	load_dynamic_resource(config, _on_loading_pck_loaded, _on_loading_pck_failed)
+
+
+## Web 平台：从 JS 获取文件名并通过 HTTP 加载 PCK
 func _start_loading_pck() -> void:
 	_loading_pck_status = LoadingPckStatus.LOADING
 	
