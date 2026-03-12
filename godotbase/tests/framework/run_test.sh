@@ -14,7 +14,7 @@ PROJECT_DIR="$(cd "$FRAMEWORK_DIR/../.." && pwd)"
 
 # --- Environment setup (Godot + Xvfb + Mesa) ---
 
-GODOT="/root/tools/godot/godot"
+GODOT="$(which godot 2>/dev/null || echo '/root/tools/godot/godot')"
 
 if command -v Xvfb &>/dev/null; then
     XVFB_BIN="Xvfb"

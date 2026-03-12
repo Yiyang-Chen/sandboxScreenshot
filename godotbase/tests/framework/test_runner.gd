@@ -17,7 +17,7 @@ extends SceneTree
 ##       finish()
 ##
 ##   # Run via shell:
-##   ./godotbase/tests/framework/run_test.sh test_my_scene.gd
+##   bash tests/framework/run_test.sh test_my_scene.gd
 
 var _screenshot_dir: String = ""
 var _viewport_width: int = 1280
