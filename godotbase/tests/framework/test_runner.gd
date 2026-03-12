@@ -110,12 +110,20 @@ func wait_for_event(event_type: Script, timeout_frames: int = 600) -> GameEvent:
 		push_warning("[TestRunner] EnvironmentRuntime not available — cannot wait for event")
 		return null
 
-	var event_system: EventSystem = env_runtime.get_system("EventSystem") as EventSystem
-	if event_system == null:
+	if not env_runtime.has_method("get_system"):
+		push_warning("[TestRunner] EnvironmentRuntime has no get_system() method")
+		return null
+
+	@warning_ignore("unsafe_method_access")
+	var system: System = env_runtime.get_system("EventSystem")
+	if not system is EventSystem:
 		push_warning("[TestRunner] EventSystem not available — cannot wait for event")
 		return null
 
-	var result: Array = []  # single-element wrapper for capture in lambda
+	@warning_ignore("unsafe_cast")
+	var event_system: EventSystem = system as EventSystem
+
+	var result: Array = []
 	var handler: Callable = func(e: GameEvent) -> void: result.append(e)
 	event_system.once(event_type, handler)
 
